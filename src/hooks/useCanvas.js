@@ -36,11 +36,11 @@ const useCanvas = (vertexShaderSource, fragmentShaderSource, options = {}) => {
 
 
    useEffect(() => {
-      
+
       const canvas = canvasRef.current
       let gl, program;
-      
-      
+
+
       var buffer;
       function initializeAttributes() {
          gl.enableVertexAttribArray(0);
@@ -48,33 +48,30 @@ const useCanvas = (vertexShaderSource, fragmentShaderSource, options = {}) => {
          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
          gl.vertexAttribPointer(0, 1, gl.FLOAT, false, 0, 0);
       }
-      
+
       function cleanup() {
          gl.useProgram(null);
          if (buffer)
-         gl.deleteBuffer(buffer);
+            gl.deleteBuffer(buffer);
          if (program)
-         gl.deleteProgram(program);
+            gl.deleteProgram(program);
       }
-      
+
       console.log("******")
-      if (!(gl = getGl(canvas))){
+      if (!(gl = getGl(canvas))) {
          console.log("No GL")
          return;
       }
-      console.log("BBBBBB")
-      
-      console.log(vertexShaderSource)
       var vertexShader = gl.createShader(gl.VERTEX_SHADER);
       gl.shaderSource(vertexShader, vertexShaderSource);
       gl.compileShader(vertexShader);
-
-
+      
+      
       var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
       gl.shaderSource(fragmentShader, fragmentShaderSource);
       gl.compileShader(fragmentShader);
-
-
+      
+      
       program = gl.createProgram();
       gl.attachShader(program, vertexShader);
       gl.attachShader(program, fragmentShader);
@@ -83,40 +80,27 @@ const useCanvas = (vertexShaderSource, fragmentShaderSource, options = {}) => {
       gl.detachShader(program, fragmentShader);
       gl.deleteShader(vertexShader);
       gl.deleteShader(fragmentShader);
-
+      
       if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
          var linkErrLog = gl.getProgramInfoLog(program);
          cleanup();
          return;
       }
-
+      
       initializeAttributes();
-
+      
       gl.useProgram(program);
-      gl.drawArrays(gl.POINTS, 0, 1);
-
-      //cleanup();
-
-      // const predraw = (context, canvas) => {
-      //    context.save()
-      //    resizeCanvas(context, canvas)
-      //    const { width, height } = context.canvas
-      //    context.clearRect(0, 0, width, height)
-      // }
-
-      // const postdraw = (context) => {
-      //    frameCount++
-      //    context.restore()
-      // }
-
-      // const render = () => {
-      //    frameCount++
-      //    predraw(context, canvas)
-      //    draw(context, frameCount)
-      //    postdraw(context)
-      //    animationFrameId = window.requestAnimationFrame(render)
-      // }
-      // render()
+      var positionLoc = gl.getUniformLocation(program, "position");
+      
+      console.log(positionLoc)
+      gl.uniform1f(positionLoc, 0.0);  // set element 0
+      console.log(positionLoc)
+      console.log("((((((((((((")
+      const render = () => {
+         gl.drawArrays(gl.POINTS, 0, 1);
+         window.requestAnimationFrame(render)
+      }
+      render()
 
       // return () => {
       //    window.cancelAnimationFrame(animationFrameId)

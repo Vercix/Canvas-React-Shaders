@@ -22,16 +22,11 @@ const StyledCanvas = styled(Canvas)`
 `
 
 function App(props) {
-
-
-
   return (
     <Container>
       <StyledCanvas
-
         vertexShaderSource={vertexSource}
         fragmentShaderSource={fragmentSource}
-        onClick={handleOnClick}
         {...props}
       />
     </Container>

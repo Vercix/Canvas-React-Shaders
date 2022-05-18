@@ -1,7 +1,7 @@
 #version 100
 precision highp float;
 
-attribute float position;
+uniform float position;
 
 void main() {
   gl_Position = vec4(position, 0.0, 0.0, 1.0);
