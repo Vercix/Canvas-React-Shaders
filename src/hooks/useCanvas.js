@@ -5,14 +5,15 @@ const useCanvas = (draw, vertexShaderSource, fragmentShaderSource, options = {})
 
    const canvasRef = useRef(null)
 
-   function resizeCanvas(context, canvas) {
+   function resizeCanvas(canvas) {
       const { width, height } = canvas.getBoundingClientRect()
-
+      console.log('________')
+      console.log(width, height)
+      console.log('________')
       if (canvas.width !== width || canvas.height !== height) {
-         const { devicePixelRatio: ratio = 1 } = window
+         const { devicePixelRatio: ratio = 2 } = window
          canvas.width = width * ratio
          canvas.height = height * ratio
-         context.scale(ratio, ratio)
          return true
       }
 
@@ -28,6 +29,10 @@ const useCanvas = (draw, vertexShaderSource, fragmentShaderSource, options = {})
       if (!gl) {
          return null;
       }
+      console.log('-BUFFER SIZE-')
+      console.log(gl.drawingBufferWidth)
+      console.log(gl.drawingBufferHeight) 
+      console.log('-BUFFER SIZE-')
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
       gl.clearColor(1.0, 1.0, 1.0, 1.0);
       gl.clear(gl.COLOR_BUFFER_BIT);
@@ -38,7 +43,8 @@ const useCanvas = (draw, vertexShaderSource, fragmentShaderSource, options = {})
    useEffect(() => {
 
       const canvas = canvasRef.current
-      let gl, program, itemSize, numItems;
+      resizeCanvas(canvas)
+      let gl, program, itemSize, numItems, frameNumber = 1;
 
       function setUniform(uniformName, value) {
          var positionLoc = gl.getUniformLocation(program, uniformName);
@@ -50,7 +56,8 @@ const useCanvas = (draw, vertexShaderSource, fragmentShaderSource, options = {})
          var xRelativeToCanvas = e.pageX - e.target.offsetLeft;
          var yRelativeToCanvas = e.target.height - ( e.pageY - e.target.offsetTop);
 
-         console.log(yRelativeToCanvas)
+         // console.log(yRelativeToCanvas)
+         console.log(xRelativeToCanvas)
          var positionLoc = gl.getUniformLocation(program, 'u_mouse');
          gl.uniform2f(positionLoc, xRelativeToCanvas, yRelativeToCanvas);
 
@@ -123,14 +130,24 @@ const useCanvas = (draw, vertexShaderSource, fragmentShaderSource, options = {})
       gl.useProgram(program);
       program.resolutionPosition = gl.getUniformLocation(program, 'u_resolution');
       console.log(program.resolutionPosition)
+      console.log("))))))))")
+      console.log(canvas.width)
+      console.log(canvas.height)
       gl.uniform2f(program.resolutionPosition , canvas.width, canvas.height);
 
       function draw() {
          gl.drawArrays(gl.TRIANGLES, 0, numItems);
       }
 
+      function postDraw() {
+         frameNumber++;
+         var timeLoc = gl.getUniformLocation(program, 'u_time');
+         gl.uniform1f(timeLoc, frameNumber);
+      }
+
       const render = () => {
          draw();
+         postDraw();
          window.requestAnimationFrame(render)
       }
       render()

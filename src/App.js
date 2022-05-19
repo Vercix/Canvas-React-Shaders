@@ -16,8 +16,8 @@ const Container = styled.div`
 `
 
 const StyledCanvas = styled(Canvas)`
-  height: 400px;
-  width: 400px;
+  height: 600px;
+  width: 600px;
 `
 
 
