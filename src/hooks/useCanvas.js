@@ -47,18 +47,12 @@ const useCanvas = (draw, vertexShaderSource, fragmentShaderSource, options = {})
 
       function handleMouseMove(e) {
 
-         var clickXRelativeToCanvas = e.pageX - e.target.offsetLeft;
-         var clickXinWebGLCoords =
-            2.0 * (clickXRelativeToCanvas - gl.drawingBufferWidth / 2)
-            / gl.drawingBufferWidth;
+         var xRelativeToCanvas = e.pageX - e.target.offsetLeft;
+         var yRelativeToCanvas = e.target.height - ( e.pageY - e.target.offsetTop);
 
-         var clickYRelativeToCanvas = e.pageY - e.target.offsetTop;
-         var clickYinWebGLCoords = -(
-            2.0 * (clickYRelativeToCanvas - gl.drawingBufferHeight / 2)
-            / gl.drawingBufferHeight);
-
-         var positionLoc = gl.getUniformLocation(program, 'MOUSE_POS');
-         gl.uniform2f(positionLoc, clickXinWebGLCoords, clickYinWebGLCoords);
+         console.log(yRelativeToCanvas)
+         var positionLoc = gl.getUniformLocation(program, 'u_mouse');
+         gl.uniform2f(positionLoc, xRelativeToCanvas, yRelativeToCanvas);
 
       }
       // setUniform('MOUSE_POS', [clickXinWebGLCoords, clickYinWebGLCoords])
@@ -127,7 +121,9 @@ const useCanvas = (draw, vertexShaderSource, fragmentShaderSource, options = {})
       initializeAttributes();
 
       gl.useProgram(program);
-
+      program.resolutionPosition = gl.getUniformLocation(program, 'u_resolution');
+      console.log(program.resolutionPosition)
+      gl.uniform2f(program.resolutionPosition , canvas.width, canvas.height);
 
       function draw() {
          gl.drawArrays(gl.TRIANGLES, 0, numItems);
@@ -140,7 +136,7 @@ const useCanvas = (draw, vertexShaderSource, fragmentShaderSource, options = {})
       render()
 
       return () => {
-         // window.cancelAnimationFrame(animationFrameId)
+         //window.cancelAnimationFrame(animationFrameId)
          canvas.removeEventListener('mousemove', handleMouseMove)
       }
    }, [vertexShaderSource, fragmentShaderSource])
