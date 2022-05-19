@@ -12,7 +12,6 @@ const fragmentSource = require('./shaders/shader.frag')
 
 const Container = styled.div`
   display: inline-block;
-  border: 1px solid black;
   margin: 0 auto;
 `
 
@@ -21,14 +20,18 @@ const StyledCanvas = styled(Canvas)`
   width: 400px;
 `
 
+
 function App(props) {
+
   return (
     <Container>
+      <br />
       <StyledCanvas
         vertexShaderSource={vertexSource}
         fragmentShaderSource={fragmentSource}
         {...props}
       />
+      <br />
     </Container>
   );
 }

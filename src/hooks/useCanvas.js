@@ -1,7 +1,7 @@
 
 import { useRef, useEffect } from 'react'
 
-const useCanvas = (vertexShaderSource, fragmentShaderSource, options = {}) => {
+const useCanvas = (draw, vertexShaderSource, fragmentShaderSource, options = {}) => {
 
    const canvasRef = useRef(null)
 
@@ -38,15 +38,53 @@ const useCanvas = (vertexShaderSource, fragmentShaderSource, options = {}) => {
    useEffect(() => {
 
       const canvas = canvasRef.current
-      let gl, program;
+      let gl, program, itemSize, numItems;
 
+      function setUniform(uniformName, value) {
+         var positionLoc = gl.getUniformLocation(program, uniformName);
+         gl.uniform1f(positionLoc, value);
+      }
+
+      function handleMouseMove(e) {
+
+         var clickXRelativeToCanvas = e.pageX - e.target.offsetLeft;
+         var clickXinWebGLCoords =
+            2.0 * (clickXRelativeToCanvas - gl.drawingBufferWidth / 2)
+            / gl.drawingBufferWidth;
+
+         var clickYRelativeToCanvas = e.pageY - e.target.offsetTop;
+         var clickYinWebGLCoords = -(
+            2.0 * (clickYRelativeToCanvas - gl.drawingBufferHeight / 2)
+            / gl.drawingBufferHeight);
+
+         var positionLoc = gl.getUniformLocation(program, 'MOUSE_POS');
+         gl.uniform2f(positionLoc, clickXinWebGLCoords, clickYinWebGLCoords);
+
+      }
+      // setUniform('MOUSE_POS', [clickXinWebGLCoords, clickYinWebGLCoords])
+      canvas.addEventListener('mousemove', handleMouseMove)
 
       var buffer;
       function initializeAttributes() {
+
+         var vertices = new Float32Array([
+            -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, // Triangle 1
+            -1.0, -1.0, 1.0, 1.0, 1.0, -1.0 // Triangle 2
+         ]);
+
+         itemSize = 2;
+         numItems = vertices.length / itemSize;
+
          gl.enableVertexAttribArray(0);
          buffer = gl.createBuffer();
+
          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-         gl.vertexAttribPointer(0, 1, gl.FLOAT, false, 0, 0);
+         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+         program.aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
+         gl.enableVertexAttribArray(program.aVertexPosition);
+         gl.vertexAttribPointer(program.aVertexPosition, itemSize, gl.FLOAT, false, 0, 0);
+
       }
 
       function cleanup() {
@@ -62,16 +100,15 @@ const useCanvas = (vertexShaderSource, fragmentShaderSource, options = {}) => {
          console.log("No GL")
          return;
       }
+
       var vertexShader = gl.createShader(gl.VERTEX_SHADER);
       gl.shaderSource(vertexShader, vertexShaderSource);
       gl.compileShader(vertexShader);
-      
-      
+
       var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
       gl.shaderSource(fragmentShader, fragmentShaderSource);
       gl.compileShader(fragmentShader);
-      
-      
+
       program = gl.createProgram();
       gl.attachShader(program, vertexShader);
       gl.attachShader(program, fragmentShader);
@@ -80,31 +117,32 @@ const useCanvas = (vertexShaderSource, fragmentShaderSource, options = {}) => {
       gl.detachShader(program, fragmentShader);
       gl.deleteShader(vertexShader);
       gl.deleteShader(fragmentShader);
-      
+
       if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
          var linkErrLog = gl.getProgramInfoLog(program);
          cleanup();
          return;
       }
-      
+
       initializeAttributes();
-      
+
       gl.useProgram(program);
-      var positionLoc = gl.getUniformLocation(program, "position");
-      
-      console.log(positionLoc)
-      gl.uniform1f(positionLoc, 0.0);  // set element 0
-      console.log(positionLoc)
-      console.log("((((((((((((")
+
+
+      function draw() {
+         gl.drawArrays(gl.TRIANGLES, 0, numItems);
+      }
+
       const render = () => {
-         gl.drawArrays(gl.POINTS, 0, 1);
+         draw();
          window.requestAnimationFrame(render)
       }
       render()
 
-      // return () => {
-      //    window.cancelAnimationFrame(animationFrameId)
-      // }
+      return () => {
+         // window.cancelAnimationFrame(animationFrameId)
+         canvas.removeEventListener('mousemove', handleMouseMove)
+      }
    }, [vertexShaderSource, fragmentShaderSource])
 
    return canvasRef
