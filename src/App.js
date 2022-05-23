@@ -1,11 +1,10 @@
-
 import Canvas from './components/Canvas'
 
 import globalStyle from './styles/global.css'
 import styled from 'styled-components'
 
-const vertexSource = require('./shaders/shader.vert')
-const fragmentSource = require('./shaders/shader.frag')
+import vertexSource from './shaders/shader.vert'
+import fragmentSource from './shaders/shader.frag'
 
 const Container = styled.div`
   display: inline-block;
@@ -13,21 +12,19 @@ const Container = styled.div`
 `
 
 const StyledCanvas = styled(Canvas)`
-  height: 600px;
-  width: 600px;
+  height: 400px;
+  width: 400px;
 `
 
 function App(props) {
 
   return (
     <Container>
-      <br />
       <StyledCanvas
         vertexShaderSource={vertexSource}
         fragmentShaderSource={fragmentSource}
         {...props}
       />
-      <br />
     </Container>
   );
 }
